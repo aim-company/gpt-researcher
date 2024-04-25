@@ -1,0 +1,35 @@
+name: Build and Publish Python Package
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create false
+        shell: bash
+
+      - name: Build Python package
+        run: poetry build
+
+      - name: Publish Python package to Azure Artifacts
+        env:
+          POETRY_REPOSITORIES_AZURE_URL: ${{ secrets.AZURE_ARTIFACTS_FEED_URL }}
+          POETRY_HTTP_BASIC_AZURE_USERNAME: "azure"
+          POETRY_HTTP_BASIC_AZURE_PASSWORD: ${{ secrets.AZURE_ARTIFACTS_PAT }}
+        run: poetry publish -r azure --no-interaction
