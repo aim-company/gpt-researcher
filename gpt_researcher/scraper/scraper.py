@@ -1,3 +1,5 @@
+import os
+
 from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
 
@@ -10,6 +12,8 @@ from gpt_researcher.scraper import (
     PyMuPDFScraper,
     WebBaseLoaderScraper,
 )
+
+PROXY_URL = os.environ['PROXY_URL']
 
 
 class Scraper:
@@ -24,7 +28,12 @@ class Scraper:
             urls:
         """
         self.urls = urls
+
         self.session = requests.Session()
+
+        if PROXY_URL:
+            self.session.proxies = {"http": PROXY_URL, "https": PROXY_URL}
+
         self.session.headers.update({"User-Agent": user_agent})
         self.scraper = scraper
 
