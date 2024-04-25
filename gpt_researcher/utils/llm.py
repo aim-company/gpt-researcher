@@ -27,6 +27,9 @@ def get_provider(llm_provider):
         case "google":
             from ..llm_provider import GoogleProvider
             llm_provider = GoogleProvider
+        case "aim-loadbalancer":
+            from ..llm_provider import AimLoadBalancerProvider
+            llm_provider = AimLoadBalancerProvider
 
         case _:
             raise Exception("LLM provider not found.")
@@ -59,7 +62,7 @@ async def create_chat_completion(
     # validate input
     if model is None:
         raise ValueError("Model cannot be None")
-    if max_tokens is not None and max_tokens > 8001:
+    if isinstance(max_tokens, int) and max_tokens > 8001:
         raise ValueError(
             f"Max tokens cannot be more than 8001, but got {max_tokens}")
 

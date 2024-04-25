@@ -1,13 +1,23 @@
 [tool.poetry]
 name = "gpt-researcher"
-version = "0.0.6"
+version = "0.1.0"
 description = "GPT Researcher is an autonomous agent designed for comprehensive online research on a variety of tasks."
 authors = ["Tavily <support@tavily.com>"]
 license = "MIT"
 readme = "README.md"
 
+[[tool.poetry.source]]
+name = "aimazure"
+url = "https://pkgs.dev.azure.com/theaimcompany/ProjectAIM/_packaging/AIMPythonPackages/pypi/simple/"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.11,<4.0"
 beautifulsoup4 = ">=4.12.2"
 colorama = ">=0.4.6"
 duckduckgo_search = ">=4.1.1"
@@ -40,6 +50,11 @@ python-docx = "^1.1.0"
 langchain-openai = "^0.1.0"
 langchain-google-genai = "^0.0.11"
 lxml = { version = ">=4.9.2", extras = ["html_clean"] }
+model-loadbalancer = {version = "^0.6.8", source = "aimazure"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+pytest-asyncio = "^0.23.6"
 
 [build-system]
 requires = ["poetry-core"]
