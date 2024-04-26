@@ -52,6 +52,7 @@ class GPTResearcher:
         self.source_urls = source_urls
         self.memory = Memory(self.cfg.embedding_provider)
         self.visited_urls = visited_urls
+        self.search_queries = []
 
         # Only relevant for DETAILED REPORTS
         # --------------------------------------
@@ -136,6 +137,9 @@ class GPTResearcher:
         context = []
         # Generate Sub-Queries including original query
         sub_queries = await get_sub_queries(query, self.role, self.cfg, self.parent_query, self.report_type) + [query]
+
+        self.search_queries = sub_queries
+
         await stream_output("logs",
                             f"🧠 I will conduct my research based on the following queries: {sub_queries}...",
                             self.websocket)
