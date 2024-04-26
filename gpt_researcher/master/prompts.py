@@ -1,9 +1,14 @@
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import warnings
+
+from langchain_core.output_parsers import PydanticOutputParser
+from pydantic import BaseModel
+
 from gpt_researcher.utils.enum import ReportType
 
 
-def generate_search_queries_prompt(question: str, parent_query: str, report_type: str, max_iterations: int=3,):
+def generate_search_queries_prompt(question: str, parent_query: str, report_type: str, max_iterations: int = 3, ):
     """ Generates the search queries prompt for the given question.
     Args: 
         question (str): The question to generate the search queries prompt for
@@ -13,7 +18,7 @@ def generate_search_queries_prompt(question: str, parent_query: str, report_type
     
     Returns: str: The search queries prompt for the given question
     """
-    
+
     if report_type == ReportType.DetailedReport.value:
         task = f"{parent_query} : {question}"
     else:
@@ -42,7 +47,7 @@ def generate_report_prompt(question, context, report_format="apa", total_words=1
            f"Use an unbiased and journalistic tone. \n" \
            "You MUST determine your own concrete and valid opinion based on the given information. Do NOT deter to general and meaningless conclusions.\n" \
            f"You MUST write all used source urls at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each.\n" \
-           "Every url should be hyperlinked: [url website](url)"\
+           "Every url should be hyperlinked: [url website](url)" \
            """
             Additionally, you MUST include hyperlinks to the relevant URLs wherever they are referenced in the report : 
         
@@ -50,13 +55,13 @@ def generate_report_prompt(question, context, report_format="apa", total_words=1
                 # Report Header
                 
                 This is a sample text. ([url website](url))
-            """\
-            f"You MUST write the report in {report_format} format.\n " \
-            f"Cite search results using inline notations. Only cite the most \
+            """ \
+           f"You MUST write the report in {report_format} format.\n " \
+           f"Cite search results using inline notations. Only cite the most \
             relevant results that answer the query accurately. Place these citations at the end \
-            of the sentence or paragraph that reference them.\n"\
-            f"Please do your best, this is very important to my career. " \
-            f"Assume that the current date is {datetime.now().strftime('%B %d, %Y')}"
+            of the sentence or paragraph that reference them.\n" \
+           f"Please do your best, this is very important to my career. " \
+           f"Assume that the current date is {datetime.now().strftime('%B %d, %Y')}"
 
 
 def generate_resource_report_prompt(question, context, report_format="apa", total_words=1000):
@@ -76,8 +81,8 @@ def generate_resource_report_prompt(question, context, report_format="apa", tota
            'Ensure that the report is well-structured, informative, in-depth, and follows Markdown syntax.\n' \
            'Include relevant facts, figures, and numbers whenever available.\n' \
            'The report should have a minimum length of 700 words.\n' \
-        'You MUST include all relevant source urls.'\
-        'Every url should be hyperlinked: [url website](url)'
+           'You MUST include all relevant source urls.' \
+           'Every url should be hyperlinked: [url website](url)'
 
 
 def generate_custom_report_prompt(query_prompt, context, report_format="apa", total_words=1000):
@@ -99,31 +104,61 @@ def generate_outline_report_prompt(question, context, report_format="apa", total
 
 
 def auto_agent_instructions():
-    return """
-        This task involves researching a given topic, regardless of its complexity or the availability of a definitive answer. The research is conducted by a specific server, defined by its type and role, with each server requiring distinct instructions.
-        Agent
-        The server is determined by the field of the topic and the specific name of the server that could be utilized to research the topic provided. Agents are categorized by their area of expertise, and each server type is associated with a corresponding emoji.
+    @dataclass
+    class AgentDescription(BaseModel):
+        """
+        Represents the server and agent role prompt for a specific task.
 
-        examples:
-        task: "should I invest in apple stocks?"
-        response: 
-        {
-            "server": "💰 Finance Agent",
-            "agent_role_prompt: "You are a seasoned finance analyst AI assistant. Your primary goal is to compose comprehensive, astute, impartial, and methodically arranged financial reports based on provided data and trends."
-        }
-        task: "could reselling sneakers become profitable?"
-        response: 
-        { 
-            "server":  "📈 Business Analyst Agent",
-            "agent_role_prompt": "You are an experienced AI business analyst assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured business reports based on provided business data, market trends, and strategic analysis."
-        }
-        task: "what are the most interesting sites in Tel Aviv?"
-        response:
-        {
-            "server:  "🌍 Travel Agent",
-            "agent_role_prompt": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights."
-        }
-    """
+        Attributes:
+            server (str): An emoji and title indicating the type of agent, such as "💰 Finance Agent".
+            agent_role_prompt (str): A detailed prompt that defines the role and objectives of the agent,
+                                     such as composing comprehensive, astute, impartial, and methodically arranged reports.
+        """
+
+        server: str
+        agent_role_prompt: str
+
+    agent_description_parser = PydanticOutputParser(pydantic_object=AgentDescription)
+    agent_description_instructions = agent_description_parser.get_format_instructions()
+
+    example_agent_1 = AgentDescription(
+        server="💰 Finance Agent",
+        agent_role_prompt="You are a seasoned finance analyst AI assistant. Your primary goal is to compose comprehensive, astute, impartial, and methodically arranged financial reports based on provided data and trends."
+    )
+
+    example_agent_2 = AgentDescription(
+        server="📈 Business Analyst Agent",
+        agent_role_prompt="You are an experienced AI business analyst assistant. Your main objective is to produce comprehensive, insightful, impartial, and systematically structured business reports based on provided business data, market trends, and strategic analysis."
+    )
+
+    example_agent_3 = AgentDescription(
+        server="🌍 Travel Agent",
+        agent_role_prompt="You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights."
+    )
+
+    return f"""This task involves researching a given topic, regardless of its complexity or the availability of a definitive answer. The research is conducted by a specific server, defined by its type and role, with each server requiring distinct instructions.
+Agent
+The server is determined by the field of the topic and the specific name of the server that could be utilized to research the topic provided. Agents are categorized by their area of expertise, and each server type is associated with a corresponding emoji.
+
+examples:
+
+task: "should I invest in apple stocks?"
+response: ```
+{example_agent_1.json()}
+```
+
+task: "could reselling sneakers become profitable?"
+response: ```
+{example_agent_2.json()}
+```
+
+task: "what are the most interesting sites in Tel Aviv?"
+response: ```
+{example_agent_3.json()}
+```
+
+{agent_description_instructions}
+"""
 
 
 def generate_summary_prompt(query, data):
@@ -166,14 +201,13 @@ def generate_subtopics_prompt() -> str:
 
 
 def generate_subtopic_report_prompt(
-    current_subtopic,
-    existing_headers,
-    main_topic,
-    context,
-    report_format="apa",
-    total_words=1000,
+        current_subtopic,
+        existing_headers,
+        main_topic,
+        context,
+        report_format="apa",
+        total_words=1000,
 ) -> str:
-
     return f"""
     "Context":
     "{context}"
@@ -236,8 +270,8 @@ def get_prompt_by_report_type(report_type):
     default_report_type = ReportType.ResearchReport.value
     if not prompt_by_type:
         warnings.warn(f"Invalid report type: {report_type}.\n"
-                        f"Please use one of the following: {', '.join([enum_value for enum_value in report_type_mapping.keys()])}\n"
-                        f"Using default report type: {default_report_type} prompt.",
-                        UserWarning)
+                      f"Please use one of the following: {', '.join([enum_value for enum_value in report_type_mapping.keys()])}\n"
+                      f"Using default report type: {default_report_type} prompt.",
+                      UserWarning)
         prompt_by_type = report_type_mapping.get(default_report_type)
     return prompt_by_type
