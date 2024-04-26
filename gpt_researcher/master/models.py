@@ -1,3 +1,5 @@
+from typing import List
+
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel
 
@@ -22,3 +24,22 @@ class AgentDescription(BaseModel):
     @staticmethod
     def get_instructions():
         return AgentDescription.get_parser().get_format_instructions()
+
+
+class SearchQueries(BaseModel):
+    """
+    Represents a collection of search queries.
+
+    Attributes:
+        queries (List[str]): A list of individual search queries expressed as strings.
+    """
+
+    queries: List[str]
+
+    @staticmethod
+    def get_parser():
+        return PydanticOutputParser(pydantic_object=SearchQueries)
+
+    @staticmethod
+    def get_instructions():
+        return SearchQueries.get_parser().get_format_instructions()

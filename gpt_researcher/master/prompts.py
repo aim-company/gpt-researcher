@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import warnings
 
-from gpt_researcher.master.models import AgentDescription
+from gpt_researcher.master.models import AgentDescription, SearchQueries
 from gpt_researcher.utils.enum import ReportType
 
 
@@ -24,7 +24,7 @@ def generate_search_queries_prompt(question: str, parent_query: str, report_type
     return f'Write {max_iterations} google search queries to search online that form an objective opinion from the following task: "{task}"' \
            f'Use the current date if needed: {datetime.now().strftime("%B %d, %Y")}.\n' \
            f'Also include in the queries specified task details such as locations, names, etc.\n' \
-           f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].'
+           f'You must respond only with a list of strings in the following format:\n\n\n{SearchQueries.get_instructions()}.'
 
 
 def generate_report_prompt(question, context, report_format="apa", total_words=1000):

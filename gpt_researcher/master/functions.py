@@ -101,8 +101,9 @@ async def get_sub_queries(query: str, agent_role_prompt: str, cfg, parent_query:
         temperature=0,
         llm_provider=cfg.llm_provider
     )
-    sub_queries = json.loads(response)
-    return sub_queries
+
+    search_queries = SearchQueries.get_parser().parse(response)
+    return search_queries.queries
 
 
 def scrape_urls(urls, cfg=None):
