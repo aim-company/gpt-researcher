@@ -1,9 +1,7 @@
 from datetime import datetime, timezone
 import warnings
 
-from langchain_core.output_parsers import PydanticOutputParser
-from pydantic import BaseModel
-
+from gpt_researcher.master.models import AgentDescription
 from gpt_researcher.utils.enum import ReportType
 
 
@@ -103,22 +101,6 @@ def generate_outline_report_prompt(question, context, report_format="apa", total
 
 
 def auto_agent_instructions():
-    class AgentDescription(BaseModel):
-        """
-        Represents the server and agent role prompt for a specific task.
-
-        Attributes:
-            server (str): An emoji and title indicating the type of agent, such as "💰 Finance Agent".
-            agent_role_prompt (str): A detailed prompt that defines the role and objectives of the agent,
-                                     such as composing comprehensive, astute, impartial, and methodically arranged reports.
-        """
-
-        server: str
-        agent_role_prompt: str
-
-    agent_description_parser = PydanticOutputParser(pydantic_object=AgentDescription)
-    agent_description_instructions = agent_description_parser.get_format_instructions()
-
     example_agent_1 = AgentDescription(
         server="💰 Finance Agent",
         agent_role_prompt="You are a seasoned finance analyst AI assistant. Your primary goal is to compose comprehensive, astute, impartial, and methodically arranged financial reports based on provided data and trends."
@@ -138,7 +120,7 @@ def auto_agent_instructions():
 Agent
 The server is determined by the field of the topic and the specific name of the server that could be utilized to research the topic provided. Agents are categorized by their area of expertise, and each server type is associated with a corresponding emoji.
 
-examples:
+Examples:
 
 task: "should I invest in apple stocks?"
 response: ```
@@ -155,7 +137,7 @@ response: ```
 {example_agent_3.json()}
 ```
 
-{agent_description_instructions}
+{AgentDescription.get_instructions()}
 """
 
 

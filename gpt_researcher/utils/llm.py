@@ -14,6 +14,7 @@ from langchain_openai import ChatOpenAI
 from gpt_researcher.master.prompts import auto_agent_instructions, generate_subtopics_prompt
 
 from .validators import Subtopics
+from ..master.models import AgentDescription
 
 
 def get_provider(llm_provider):
@@ -104,9 +105,9 @@ def choose_agent(smart_llm_model: str, llm_provider: str, task: str) -> dict:
             temperature=0,
             llm_provider=llm_provider
         )
-        agent_dict = json.loads(response)
-        print(f"Agent: {agent_dict.get('server')}")
-        return agent_dict
+        agent = AgentDescription.get_parser().parse(response)
+        print(f"Agent: {agent.server}")
+        return agent.dict()
     except Exception as e:
         print(f"{Fore.RED}Error in choose_agent: {e}{Style.RESET_ALL}")
         return {"server": "Default Agent",
