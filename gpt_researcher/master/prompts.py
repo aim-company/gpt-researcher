@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from datetime import datetime, timezone
 import warnings
 
@@ -104,7 +103,6 @@ def generate_outline_report_prompt(question, context, report_format="apa", total
 
 
 def auto_agent_instructions():
-    @dataclass
     class AgentDescription(BaseModel):
         """
         Represents the server and agent role prompt for a specific task.

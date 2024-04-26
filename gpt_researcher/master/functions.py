@@ -74,6 +74,7 @@ async def choose_agent(query, cfg):
         agent_dict = json.loads(response)
         return agent_dict["server"], agent_dict["agent_role_prompt"]
     except Exception as e:
+        print(f"{Fore.RED}Error in choose_agent: {e}{Style.RESET_ALL}")
         return "Default Agent", "You are an AI critical thinker research assistant. Your sole purpose is to write well written, critically acclaimed, objective and structured reports on given text."
 
 
