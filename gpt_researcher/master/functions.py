@@ -103,6 +103,7 @@ async def get_sub_queries(query: str, agent_role_prompt: str, cfg, parent_query:
     )
 
     search_queries = SearchQueries.get_parser().parse(response)
+    print(f'Search queries: {search_queries.queries}')
     return search_queries.queries
 
 
