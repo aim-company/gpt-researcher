@@ -18,6 +18,7 @@ class GPTResearcher:
         query: str,
         report_type: str = ReportType.ResearchReport.value,
         source_urls=None,
+        site_constraint=None,
         config_path=None,
         websocket=None,
         agent=None,
@@ -26,20 +27,6 @@ class GPTResearcher:
         subtopics: list = [],
         visited_urls: set = set(),
     ):
-        """
-        Initialize the GPT Researcher class.
-        Args:
-            query: str,
-            report_type: str
-            source_urls
-            config_path
-            websocket
-            agent
-            role
-            parent_query: str
-            subtopics: list
-            visited_urls: set
-        """
         self.query = query
         self.agent = agent
         self.role = role
@@ -52,6 +39,7 @@ class GPTResearcher:
         self.retriever = get_retriever(self.cfg.retriever)
         self.context = []
         self.source_urls = source_urls
+        self.site_constraint = site_constraint
         self.memory = Memory(self.cfg.embedding_provider)
         self.visited_urls = visited_urls
         self.search_queries = []
@@ -129,6 +117,12 @@ class GPTResearcher:
         self.search_queries = await get_sub_queries(
             query, self.role, self.cfg, self.parent_query, self.report_type
         ) + [query]
+
+        # HACK: inject site selector for Google search in here. Would be MUCH nicer if this was done in the GoogleSerper class directly as a parameter.
+        if self.site_constraint:
+            self.search_queries = [
+                q + f" site:{self.site_constraint}" for q in self.search_queries
+            ]
 
         await stream_output(
             "logs",
