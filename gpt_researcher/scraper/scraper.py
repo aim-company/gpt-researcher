@@ -13,7 +13,7 @@ from gpt_researcher.scraper import (
     WebBaseLoaderScraper,
 )
 
-PROXY_URL = os.environ.get('PROXY_URL')
+PROXY_URL = os.environ.get('PROXY_URL', "")
 
 
 class Scraper:
