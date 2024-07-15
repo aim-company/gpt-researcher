@@ -23,6 +23,7 @@ class GPTResearcher:
         websocket=None,
         agent=None,
         role=None,
+        max_content_length=None,
         parent_query: str = "",
         subtopics: list = [],
         visited_urls: set = set(),
@@ -39,6 +40,7 @@ class GPTResearcher:
         self.retriever = get_retriever(self.cfg.retriever)
         self.context = []
         self.source_urls = source_urls
+        self.max_content_length = max_content_length
         self.site_constraint = site_constraint
         self.memory = Memory(self.cfg.embedding_provider)
         self.visited_urls = visited_urls
@@ -178,6 +180,15 @@ class GPTResearcher:
             "logs", f"🤔 Researching for relevant information...\n", self.websocket
         )
         scraped_content_results = scrape_urls(new_search_urls, self.cfg)
+
+        # HACK: limit max content size:
+        if self.max_content_length:
+            scraped_content_results = [
+                content
+                for content in scraped_content_results
+                if len(content) <= self.max_content_length
+            ]
+
         return scraped_content_results
 
     async def get_similar_content_by_query(self, query, pages):
