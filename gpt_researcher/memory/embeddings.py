@@ -1,5 +1,7 @@
 import os
 
+CHUNK_SIZE = os.getenv("GPT_RESEARCHER_EMBEDDING_CHUNK_SIZE", 16)
+
 
 class Memory:
     def __init__(self, embedding_provider, embedding_model, **kwargs):
@@ -18,12 +20,16 @@ class Memory:
                 from langchain_openai import AzureOpenAIEmbeddings
 
                 _embeddings = AzureOpenAIEmbeddings(
-                    deployment=os.environ["AZURE_EMBEDDING_MODEL"], chunk_size=16
+                    deployment=os.environ["AZURE_EMBEDDING_MODEL"],
+                    chunk_size=CHUNK_SIZE,
                 )
             case "aim-loadbalancer":
                 from model_loadbalancer import EmbeddingsBalancer
 
-                _embeddings = EmbeddingsBalancer.from_engine(engine=embedding_model)
+                _embeddings = EmbeddingsBalancer.from_engine(
+                    engine=embedding_model,
+                    chunk_size=CHUNK_SIZE,
+                )
 
             case "huggingface":
                 from langchain.embeddings import HuggingFaceEmbeddings

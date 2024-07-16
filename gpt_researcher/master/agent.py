@@ -202,7 +202,7 @@ class GPTResearcher:
             documents=pages, embeddings=self.memory.get_embeddings()
         )
         # Run Tasks
-        return context_compressor.get_context(query, max_results=8)
+        return await context_compressor.get_context(query, max_results=8)
 
     ########################################################################################
 
