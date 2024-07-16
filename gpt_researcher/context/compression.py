@@ -1,3 +1,4 @@
+import os
 from .retriever import SearchAPIRetriever
 from langchain.retrievers import (
     ContextualCompressionRetriever,
@@ -8,6 +9,9 @@ from langchain.retrievers.document_compressors import (
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+CHUNK_SIZE = os.getenv("GPT_RESEARCHER_CHUNK_SIZE", 10_000)
+OVERLAP = os.getenv("GPT_RESEARCHER_OVERLAP", 100)
+SIMILARITY_TH = float(os.getenv("GPT_RESEARCHER_SIMILARITY_TH", "0.5"))
 
 class ContextCompressor:
     def __init__(self, documents, embeddings, max_results=5, **kwargs):
@@ -15,10 +19,10 @@ class ContextCompressor:
         self.documents = documents
         self.kwargs = kwargs
         self.embeddings = embeddings
-        self.similarity_threshold = 0.38
+        self.similarity_threshold = SIMILARITY_TH
 
     def _get_contextual_retriever(self):
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+        splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP)
         relevance_filter = EmbeddingsFilter(embeddings=self.embeddings,
                                             similarity_threshold=self.similarity_threshold)
         pipeline_compressor = DocumentCompressorPipeline(
