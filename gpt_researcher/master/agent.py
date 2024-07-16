@@ -1,4 +1,5 @@
 import asyncio
+from functools import partial
 import time
 
 from gpt_researcher.config import Config
@@ -6,6 +7,7 @@ from gpt_researcher.context.compression import ContextCompressor
 from gpt_researcher.master.functions import *
 from gpt_researcher.memory import Memory
 from gpt_researcher.utils.enum import ReportType
+from gpt_researcher.utils.multithreading import run_in_thread
 
 
 class GPTResearcher:
@@ -69,7 +71,6 @@ class GPTResearcher:
         else:
             self.context = await self.get_context_by_search(self.query)
 
-        time.sleep(2)
 
     async def write_report(self, existing_headers: list = []):
         await stream_output(
@@ -142,8 +143,9 @@ class GPTResearcher:
         await stream_output(
             "logs", f"\n🔎 Running research for '{sub_query}'...", self.websocket
         )
-
-        scraped_sites = await self.scrape_sites_by_query(sub_query)
+        
+        # scraped_sites = await self.scrape_sites_by_query(sub_query)
+        scraped_sites = await run_in_thread(self.scrape_sites_by_query(sub_query))
         content = await self.get_similar_content_by_query(sub_query, scraped_sites)
 
         if content:
