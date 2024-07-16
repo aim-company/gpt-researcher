@@ -42,7 +42,7 @@ class GPTResearcher:
         self.source_urls = source_urls
         self.max_content_length = max_content_length
         self.site_constraint = site_constraint
-        self.memory = Memory(self.cfg.embedding_provider)
+        self.memory = Memory(self.cfg.embedding_provider, self.cfg.embedding_model)
         self.visited_urls = visited_urls
         self.search_queries = []
 

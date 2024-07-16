@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gpt-researcher"
-version = "0.1.9"
+version = "0.1.10"
 description = "GPT Researcher is an autonomous agent designed for comprehensive online research on a variety of tasks."
 authors = ["Tavily <support@tavily.com>"]
 license = "MIT"
@@ -50,7 +50,7 @@ python-docx = "^1.1.0"
 langchain-openai = "^0.1.0"
 langchain-google-genai = "^0.0.11"
 lxml = { version = ">=4.9.2", extras = ["html_clean"] }
-model-loadbalancer = {version = "^0.6.8", source = "aimazure"}
+model-loadbalancer = "^0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
