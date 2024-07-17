@@ -144,8 +144,7 @@ class GPTResearcher:
             "logs", f"\n🔎 Running research for '{sub_query}'...", self.websocket
         )
         
-        # scraped_sites = await self.scrape_sites_by_query(sub_query)
-        scraped_sites = await run_in_thread(self.scrape_sites_by_query(sub_query))
+        scraped_sites = await self.scrape_sites_by_query(sub_query)
         content = await self.get_similar_content_by_query(sub_query, scraped_sites)
 
         if content:
@@ -181,7 +180,7 @@ class GPTResearcher:
         await stream_output(
             "logs", f"🤔 Researching for relevant information...\n", self.websocket
         )
-        scraped_content_results = scrape_urls(new_search_urls, self.cfg)
+        scraped_content_results = await run_in_thread(scrape_urls, new_search_urls, self.cfg)
 
         # HACK: limit max content size:
         if self.max_content_length:

@@ -51,7 +51,6 @@ class ContextCompressor:
 
     async def get_context(self, query, max_results=5):
         compressed_docs = self._get_contextual_retriever()
-        # relevant_docs = compressed_docs.get_relevant_documents(query)
-        relevant_docs = await run_in_thread(compressed_docs.ainvoke(query))
+        relevant_docs = await run_in_thread(compressed_docs.get_relevant_documents, query)
 
         return self._pretty_print_docs(relevant_docs, max_results)
