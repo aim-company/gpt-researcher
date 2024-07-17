@@ -14,6 +14,7 @@ from gpt_researcher.scraper import (
 )
 
 PROXY_URL = os.environ.get('PROXY_URL', "")
+N_WORKERS = os.environ.get('GPT_RESEARCHER_SCRAPING_N_WORKERS', 100)
 
 
 class Scraper:
@@ -42,7 +43,7 @@ class Scraper:
         Extracts the content from the links
         """
         partial_extract = partial(self.extract_data_from_link, session=self.session)
-        with ThreadPoolExecutor(max_workers=20) as executor:
+        with ThreadPoolExecutor(max_workers=N_WORKERS) as executor:
             contents = executor.map(partial_extract, self.urls)
         res = [content for content in contents if content["raw_content"] is not None]
         return res
