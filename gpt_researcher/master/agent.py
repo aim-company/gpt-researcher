@@ -20,6 +20,7 @@ class GPTResearcher:
         query: str,
         report_type: str = ReportType.ResearchReport.value,
         source_urls=None,
+        scraped_sources=None,
         site_constraint=None,
         config_path=None,
         websocket=None,
@@ -42,6 +43,7 @@ class GPTResearcher:
         self.retriever = get_retriever(self.cfg.retriever)
         self.context = []
         self.source_urls = source_urls
+        self.scraped_sources = scraped_sources
         self.max_content_length = max_content_length
         self.site_constraint = site_constraint
         self.memory = Memory(self.cfg.embedding_provider, self.cfg.embedding_model)
@@ -66,11 +68,18 @@ class GPTResearcher:
         await stream_output("logs", self.agent, self.websocket)
 
         # If specified, the researcher will use the given urls as the context for the research.
-        if self.source_urls:
+        if self.source_urls and not self.scraped_sources:
             self.context = await self.get_context_by_urls(self.source_urls)
+        elif self.source_urls and self.scraped_sources:
+            scraped_sites = [
+                {"url": url, "raw_content": source}
+                for url, source in zip(self.source_urls, self.scraped_sources)
+            ]
+            self.scraped_sources = await self.get_similar_content_by_query(
+                self.query, scraped_sites
+            )
         else:
             self.context = await self.get_context_by_search(self.query)
-
 
     async def write_report(self, existing_headers: list = []):
         await stream_output(
@@ -143,7 +152,7 @@ class GPTResearcher:
         await stream_output(
             "logs", f"\n🔎 Running research for '{sub_query}'...", self.websocket
         )
-        
+
         scraped_sites = await self.scrape_sites_by_query(sub_query)
         content = await self.get_similar_content_by_query(sub_query, scraped_sites)
 
@@ -180,7 +189,9 @@ class GPTResearcher:
         await stream_output(
             "logs", f"🤔 Researching for relevant information...\n", self.websocket
         )
-        scraped_content_results = await run_in_thread(scrape_urls, new_search_urls, self.cfg)
+        scraped_content_results = await run_in_thread(
+            scrape_urls, new_search_urls, self.cfg
+        )
 
         # HACK: limit max content size:
         if self.max_content_length:
