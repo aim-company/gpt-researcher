@@ -75,7 +75,7 @@ class GPTResearcher:
                 {"url": url, "raw_content": source}
                 for url, source in zip(self.source_urls, self.scraped_sources)
             ]
-            self.scraped_sources = await self.get_similar_content_by_query(
+            self.context = await self.get_similar_content_by_query(
                 self.query, scraped_sites
             )
         else:
